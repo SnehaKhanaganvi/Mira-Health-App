@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mira Health Prediction</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ── */
+    nav {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 0 28px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand { font-size: 1rem; font-weight: 600; letter-spacing: .02em; }
+    .nav-btn {
+      background: #fff;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 16px;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .nav-btn:hover { background: #e8e8e8; }
+
+    /* ── Layout ── */
+    main {
+      max-width: 900px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+    h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 6px; }
+    .sub { font-size: .85rem; color: #666; margin-bottom: 24px; }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border: 1px solid #e0e4ea;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .card-head {
+      padding: 12px 18px;
+      border-bottom: 1px solid #e0e4ea;
+      font-size: .9rem;
+      font-weight: 600;
+      background: #fafbfc;
+    }
+    .card-body { padding: 18px; }
+
+    /* ── Form ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    label { font-size: .78rem; font-weight: 500; color: #555; }
+    input {
+      border: 1px solid #d0d5dd;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: .88rem;
+      color: #1a1a2e;
+      outline: none;
+      transition: border-color .15s;
+    }
+    input:focus { border-color: #1a1a2e; }
+    .hint { font-size: .72rem; color: #888; margin-top: 2px; }
+
+    /* ── Buttons ── */
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 8px 18px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-dark    { background: #1a1a2e; color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid #d0d5dd; color: #444; }
+    .btn-danger  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .btn-warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .btn-sm      { padding: 5px 12px; font-size: .78rem; }
+
+    /* ── Alerts ── */
+    .alert { border-radius: 8px; padding: 10px 14px; font-size: .84rem; margin-bottom: 14px; }
+    .alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #888;
+      border-bottom: 1px solid #e0e4ea;
+      background: #fafbfc;
+    }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+    .actions { display: flex; gap: 6px; }
+    .remarks-cell { max-width: 240px; font-size: .78rem; color: #555; }
+    .empty { text-align: center; padding: 40px 20px; color: #aaa; font-size: .9rem; }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid #ddd;
+      border-top-color: #1a1a2e;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-row { display: flex; align-items: center; font-size: .84rem; color: #666; margin-top: 10px; }
+
+    .form-actions { display: flex; gap: 10px; margin-top: 18px; }
+
+    /* ── View Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(26,26,46,.45);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 10px;
+      width: 100%; max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,.2);
+    }
+    .modal-head {
+      padding: 14px 20px;
+      border-bottom: 1px solid #e0e4ea;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-head h2 { font-size: 1rem; font-weight: 600; }
+    .modal-close {
+      background: none; border: none; cursor: pointer;
+      font-size: 1.1rem; color: #888; line-height: 1;
+      padding: 4px;
+    }
+    .modal-close:hover { color: #1a1a2e; }
+    .modal-body { padding: 20px; }
+    .view-row {
+      display: flex; justify-content: space-between; gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid #f0f2f5;
+      font-size: .86rem;
+    }
+    .view-row:last-of-type { border-bottom: none; }
+    .view-label { color: #888; font-weight: 500; }
+    .view-value { color: #1a1a2e; text-align: right; }
+    .view-remarks {
+      margin-top: 14px;
+      background: #f5f7fa;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: .84rem;
+      color: #444;
+      line-height: 1.5;
+    }
+    .view-remarks-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: #888; font-weight: 600; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+const API = "http://localhost:5000/api";
+
+/* ── helpers ── */
+const api = {
+  list:   ()        => fetch(`${API}/patients`).then(r => r.json()),
+  get:    (id)       => fetch(`${API}/patients/${id}`).then(r => r.json()),
+  create: (data)    => fetch(`${API}/patients`, { method:"POST",  headers:{"Content-Type":"application/json"}, body:JSON.stringify(data) }),
+  update: (id,data) => fetch(`${API}/patients/${id}`, { method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data) }),
+  delete: (id)      => fetch(`${API}/patients/${id}`, { method:"DELETE" }),
+};
+
+const EMPTY = { full_name:"", dob:"", email:"", glucose:"", haemoglobin:"", cholesterol:"" };
+
+/* ── PatientForm ── */
+function PatientForm({ initial, onSaved, onCancel }) {
+  const [form,    setForm]    = useState(initial || EMPTY);
+  const [errors,  setErrors]  = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  async function submit(e) {
+    e.preventDefault();
+    setErrors([]);
+    setLoading(true);
+    try {
+      const res  = initial?.id
+        ? await api.update(initial.id, form)
+        : await api.create(form);
+      const body = await res.json();
+      if (!res.ok) { setErrors(body.errors || ["Something went wrong."]); return; }
+      onSaved(body);
+    } catch { setErrors(["Could not reach the server. Is the backend running?"]); }
+    finally { setLoading(false); }
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+
+  return (
+    <div className="card">
+      <div className="card-head">{initial?.id ? `Edit — ${initial.full_name}` : "Add New Patient"}</div>
+      <div className="card-body">
+
+        {errors.length > 0 && (
+          <div className="alert alert-error">
+            {errors.map((e,i) => <div key={i}>{e}</div>)}
+          </div>
+        )}
+
+        <form onSubmit={submit}>
+          <div className="form-grid">
+            <div className="form-group">
+              <label>Full Name *</label>
+              <input value={form.full_name} onChange={e=>set("full_name",e.target.value)} placeholder="e.g. Priya Sharma" required />
+            </div>
+            <div className="form-group">
+              <label>Date of Birth *</label>
+              <input type="date" value={form.dob} max={today} onChange={e=>set("dob",e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label>Email Address *</label>
+              <input type="email" value={form.email} onChange={e=>set("email",e.target.value)} placeholder="e.g. priya@email.com" required />
+            </div>
+            <div className="form-group">
+              <label>Glucose (mg/dL) *</label>
+              <input type="number" step="0.1" value={form.glucose} onChange={e=>set("glucose",e.target.value)} placeholder="e.g. 95.0" required />
+              <span className="hint">Normal fasting: 70–100 mg/dL</span>
+            </div>
+            <div className="form-group">
+              <label>Haemoglobin (g/dL) *</label>
+              <input type="number" step="0.1" value={form.haemoglobin} onChange={e=>set("haemoglobin",e.target.value)} placeholder="e.g. 14.0" required />
+              <span className="hint">Normal: 12–17 g/dL</span>
+            </div>
+            <div className="form-group">
+              <label>Cholesterol (mg/dL) *</label>
+              <input type="number" step="0.1" value={form.cholesterol} onChange={e=>set("cholesterol",e.target.value)} placeholder="e.g. 185.0" required />
+              <span className="hint">Desirable: below 200 mg/dL</span>
+            </div>
+          </div>
+
+          {loading && (
+            <div className="loading-row">
+              <span className="spinner"></span>
+              Calling Gemini AI — generating health prediction…
+            </div>
+          )}
+
+          <div className="form-actions">
+            <button type="submit" className="btn btn-dark" disabled={loading}>
+              {loading ? "Saving…" : (initial?.id ? "Update Patient" : "Save and Predict")}
+            </button>
+            {onCancel && <button type="button" className="btn btn-outline" onClick={onCancel}>Cancel</button>}
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ── PatientViewModal ── */
+function PatientViewModal({ patientId, onClose }) {
+  const [patient, setPatient] = useState(null);
+  const [error,   setError]   = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    api.get(patientId)
+      .then(p => { if (!cancelled) setPatient(p); })
+      .catch(() => { if (!cancelled) setError("Could not load patient details."); });
+    return () => { cancelled = true; };
+  }, [patientId]);
+
+  function calcAge(dob) {
+    const d = new Date(dob), now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+    return age;
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box" onClick={e => e.stopPropagation()}>
+        <div className="modal-head">
+          <h2>Patient Details</h2>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          {error && <div className="alert alert-error">{error}</div>}
+
+          {!patient && !error && (
+            <div className="loading-row"><span className="spinner"></span>Loading…</div>
+          )}
+
+          {patient && (
+            <>
+              <div className="view-row">
+                <span className="view-label">Full Name</span>
+                <span className="view-value">{patient.full_name}</span>
+              </div>
+              <div className="view-row">
+                <span className="view-label">Date of Birth</span>
+                <span className="view-value">{patient.dob} ({calcAge(patient.dob)} yrs)</span>
+              </div>
+              <div className="view-row">
+                <span className="view-label">Email</span>
+                <span className="view-value">{patient.email}</span>
+              </div>
+              <div className="view-row">
+                <span className="view-label">Glucose</span>
+                <span className="view-value">{patient.glucose} mg/dL</span>
+              </div>
+              <div className="view-row">
+                <span className="view-label">Haemoglobin</span>
+                <span className="view-value">{patient.haemoglobin} g/dL</span>
+              </div>
+              <div className="view-row">
+                <span className="view-label">Cholesterol</span>
+                <span className="view-value">{patient.cholesterol} mg/dL</span>
+              </div>
+
+              <div className="view-remarks">
+                <div className="view-remarks-label">AI Health Remarks</div>
+                {patient.remarks || "No prediction available."}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── PatientTable ── */
+function PatientTable({ patients, onView, onEdit, onDelete }) {
+  if (!patients.length) return <div className="empty">No patient records yet. Add one above.</div>;
+
+  return (
+    <div className="card" style={{overflowX:"auto"}}>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Full Name</th>
+            <th>Date of Birth</th>
+            <th>Email</th>
+            <th>Glucose</th>
+            <th>Haemoglobin</th>
+            <th>Cholesterol</th>
+            <th>AI Remarks</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {patients.map(p => (
+            <tr key={p.id}>
+              <td style={{color:"#aaa"}}>{p.id}</td>
+              <td style={{fontWeight:500}}>{p.full_name}</td>
+              <td>{p.dob}</td>
+              <td style={{fontSize:".78rem",color:"#666"}}>{p.email}</td>
+              <td>{p.glucose}</td>
+              <td>{p.haemoglobin}</td>
+              <td>{p.cholesterol}</td>
+              <td className="remarks-cell">{p.remarks || "—"}</td>
+              <td>
+                <div className="actions">
+                  <button className="btn btn-outline btn-sm" onClick={()=>onView(p)}>View</button>
+                  <button className="btn btn-warning btn-sm" onClick={()=>onEdit(p)}>Edit</button>
+                  <button className="btn btn-danger  btn-sm" onClick={()=>onDelete(p)}>Delete</button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/* ── App ── */
+function App() {
+  const [patients,   setPatients]   = useState([]);
+  const [editTarget, setEditTarget] = useState(null);
+  const [viewTarget, setViewTarget] = useState(null);
+  const [showForm,   setShowForm]   = useState(false);
+  const [notice,     setNotice]     = useState(null);
+
+  useEffect(() => { load(); }, []);
+
+  async function load() {
+    try { setPatients(await api.list()); }
+    catch { flash("Could not load patients. Is the backend running?", "error"); }
+  }
+
+  function flash(msg, type="success") {
+    setNotice({ msg, type });
+    setTimeout(() => setNotice(null), 4000);
+  }
+
+  function onSaved(patient) {
+    load();
+    setShowForm(false);
+    setEditTarget(null);
+    flash(editTarget ? `${patient.full_name} updated.` : `${patient.full_name} added with AI prediction.`);
+  }
+
+  function onView(p) {
+    setViewTarget(p.id);
+  }
+
+  function onEdit(p) {
+    setEditTarget(p);
+    setShowForm(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function onDelete(p) {
+    if (!window.confirm(`Delete record for ${p.full_name}?`)) return;
+    await api.delete(p.id);
+    flash(`${p.full_name} deleted.`);
+    load();
+  }
+
+  function cancelForm() {
+    setShowForm(false);
+    setEditTarget(null);
+  }
+
+  return (
+    <>
+      <nav>
+        <span className="nav-brand">Mira Health Prediction</span>
+        {!showForm && !editTarget &&
+          <button className="nav-btn" onClick={() => { setShowForm(true); setEditTarget(null); }}>
+            + Add Patient
+          </button>
+        }
+      </nav>
+
+      <main>
+        <h1>Patient Records</h1>
+        <p className="sub">Manage patient blood test records and receive AI-generated health predictions.</p>
+
+        {notice && (
+          <div className={`alert alert-${notice.type === "error" ? "error" : "success"}`}>
+            {notice.msg}
+          </div>
+        )}
+
+        {(showForm || editTarget) && (
+          <PatientForm
+            initial={editTarget}
+            onSaved={onSaved}
+            onCancel={cancelForm}
+          />
+        )}
+
+        <PatientTable patients={patients} onView={onView} onEdit={onEdit} onDelete={onDelete} />
+      </main>
+
+      {viewTarget && (
+        <PatientViewModal patientId={viewTarget} onClose={() => setViewTarget(null)} />
+      )}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
