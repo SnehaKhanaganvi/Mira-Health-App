@@ -38,10 +38,9 @@ health_react/
 
 
 
-<img width="676" height="463" alt="Screenshot 2026-07-08 225405" src="https://github.com/user-attachments/assets/a7183fe4-371f-417d-94d8-0053792ddbca" />
+<img width="955" height="470" alt="Screenshot 2026-07-08 225319" src="https://github.com/user-attachments/assets/a15fb097-63e5-4625-96e1-504e7d52f4dd" />
 
-
-<img width="676" height="463" alt="Screenshot 2026-07-08 225405" src="https://github.com/user-attachments/assets/53704807-484e-4143-b268-02a58b1d0193" />
+<img width="955" height="470" alt="Screenshot 2026-07-08 225319" src="https://github.com/user-attachments/assets/7cd9ec0a-e41b-42aa-8240-7e380820b2eb" />
 
 
 <img width="676" height="463" alt="Screenshot 2026-07-08 225405" src="https://github.com/user-attachments/assets/23fa16c7-e738-4bd6-8e34-47a46f635880" />
