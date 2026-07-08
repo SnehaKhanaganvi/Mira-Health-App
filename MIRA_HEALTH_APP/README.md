@@ -36,6 +36,17 @@ health_react/
 | PUT    | /api/patients/:id    | Update patient       |
 | DELETE | /api/patients/:id    | Delete patient       |
 
+
+
+<img width="676" height="463" alt="Screenshot 2026-07-08 225405" src="https://github.com/user-attachments/assets/a7183fe4-371f-417d-94d8-0053792ddbca" />
+
+
+<img width="676" height="463" alt="Screenshot 2026-07-08 225405" src="https://github.com/user-attachments/assets/53704807-484e-4143-b268-02a58b1d0193" />
+
+
+<img width="676" height="463" alt="Screenshot 2026-07-08 225405" src="https://github.com/user-attachments/assets/23fa16c7-e738-4bd6-8e34-47a46f635880" />
+
+
 ## Setup
 
 ### Backend
